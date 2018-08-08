@@ -31,6 +31,7 @@ class BurgerBuilder extends Component {
   };
 
   componentDidMount() {
+    console.log(this.props);
     axios
       .get("https://react-burger-project-5b4ab.firebaseio.com/ingredients.json")
       .then(response => this.setState({ ingredients: response.data }))
@@ -49,29 +50,22 @@ class BurgerBuilder extends Component {
 
   purchaseContinueHandler = () => {
     //alert("You Continue!");
-    this.setState({ loading: true });
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice,
-      customer: {
-        address: {
-          street: "345, Lunar Street",
-          zipCode: "432123",
-          country: "India"
-        },
-        email: "test@test.com",
-        name: "Max"
-      },
-      deliveryMethod: "fastest"
-    };
-    axios
-      .post("/orders.json", order)
-      .then(response => {
-        this.setState({ loading: false, purchasing: false });
-      })
-      .catch(error => {
-        this.setState({ loading: false, purchasing: false });
-      });
+
+    // this.props.history.push("/checkout"); >>> intead of this we also want to pass the ingredients to the checkout page and hence we use the following method to pass the ingredients in the page address using search param and then retrive them from there using URLSearchParams
+    const queryParams = [];
+    for (let i in this.state.ingredients) {
+      queryParams.push(
+        encodeURIComponent(i) +
+          "=" +
+          encodeURIComponent(this.state.ingredients[i])
+      );
+    }
+    queryParams.push("price=" + this.state.totalPrice);
+    const queryString = queryParams.join("&");
+    this.props.history.push({
+      pathname: "/checkout",
+      search: "?" + queryString
+    });
   };
 
   updatePurchaseState(ingredients) {
